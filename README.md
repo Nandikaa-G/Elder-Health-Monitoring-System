@@ -14,4 +14,6 @@ The Arduino Health Monitoring System offers a comprehensive solution for continu
 3. Communication Interface:
    - Wi-Fi module (e.g., ESP8266) for internet connectivity
 4. Power Source:
-   - Rechargeable battery pack or USB power source
+   - Rechargeable battery pack or USB power source  
+5. Breadboard
+6. LCD Display
