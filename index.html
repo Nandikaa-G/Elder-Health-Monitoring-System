@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <title>Health Monitoring System for the Elderly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .header {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        .chart-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Health Monitoring System for the Elderly</h1>
+    </div>
+    <div class="container">
+        <div class="chart-container">
+            <canvas id="temperatureChart" width="400" height="200"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="humidityChart" width="400" height="200"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="heartRateChart" width="400" height="200"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="fallChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            function getData() {
+                var url ="https://api.thingspeak.com/channels/2491518/feeds.json?api_key=Y3OPLFRSLHOML239&results=5";
+
+                $.getJSON(url)
+                .done(function(data) {
+                    var field1Values = [];
+                    var field2Values = [];
+                    var field3Values = [];
+                    var field4Values = [];
+                    var timestamps = [];
+
+                    $.each(data.feeds, function(index, feed) {
+                        field1Values.push(feed.field1);
+                        field2Values.push(feed.field2);
+                        field3Values.push(feed.field3);
+                        field4Values.push(feed.field4);
+                        
+                        var time = new Date(feed.created_at);
+                        var formattedTime = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        timestamps.push(formattedTime);
+                    });
+
+                    createChart('temperatureChart', 'Temperature', timestamps, field1Values, '#84bd00', 40, 30, 'High temperature detected!');
+                    createChart('humidityChart', 'Humidity', timestamps, field2Values, '#00205b', 50, 25, 'High humidity detected!');
+                    createChart('heartRateChart', 'Heart Rate', timestamps, field3Values, 'red', 55, 25, 'High heart rate detected!');
+                    createChart('fallChart', 'Fall', timestamps, field4Values, 'blue', 400, 200, 'High fall detected!');
+                })
+                .fail(function(jqxhr, textStatus, error) {
+                    var err = textStatus + ", " + error;
+                    console.log( "Request Failed: " + err );
+                });
+            }
+
+            function createChart(chartId, label, labels, data, backgroundColor, Upperthreshold, Lowerthreshold, alertMessage) {
+                var ctx = document.getElementById(chartId).getContext('2d');
+
+                var chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            borderColor: '',
+                            backgroundColor: backgroundColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: false
+                                }
+                            }]
+                        }
+                    }
+                });
+                chart.config.data.datasets[0].data.forEach(function(value) {
+                  if (value > Upperthreshold) {
+                    alert("High value detected in " + label + " chart!");
+                } else if (value < Lowerthreshold) {
+		    alert("Low value detected in " + label + " chart!");
+		}
+              });
+            }
+            getData();
+            setInterval(getData,10000);
+        });
+    </script>
+</body>
+</html>
