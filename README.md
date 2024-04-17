@@ -22,4 +22,5 @@ https://drive.google.com/drive/folders/110s-owdqytnh4y6bFW42fEiB6J2YMBKX?usp=sha
 
 # Steps to run
 1. Clone the repository and update the api key required for ThingSpeak server
-2. Run the index.html separately
+2. Give the connections as specified in the Schematic diagram
+3. Run the index.html separately
